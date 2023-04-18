@@ -54,7 +54,10 @@ async function createAxiosInstance(proxy) {
 
 	// Add a response interceptor to retry failed requests
 	instance.interceptors.response.use(
-		(response) => response,
+		(response) => {
+			if (proxy) proxy.successRequest++;
+			return response;
+		},
 		async (error) => {
 			const originalRequest = { ...error.config, retryCount: error.config?.retryCount || 0 };
 			if (
@@ -81,8 +84,8 @@ async function createAxiosInstance(proxy) {
 					return Promise.reject(new Error("Maximum retries reached"));
 				}
 
-				const nextInstance = getNextInstance();
-				if (nextInstance === null) return Promise.reject(new Error("No more proxies available"));
+				const nextInstance = await getNextInstance();
+				if (nextInstance == null) return Promise.reject(new Error("No more proxies available"));
 
 				// Delay before retrying the request
 				await new Promise((resolve) => setTimeout(resolve, delayBetweenRetry));
@@ -93,7 +96,7 @@ async function createAxiosInstance(proxy) {
 				);
 				return nextInstance(originalRequest);
 			}
-			return Promise.reject(error);
+			if (error) return Promise.reject(error);
 		}
 	);
 
@@ -137,13 +140,35 @@ export async function getCompatibleProxies(url) {
 	instances = await getInstances();
 	return proxies;
 }
+const calculateSuccessRate = (successRequests, failedRequests) => {
+	const totalRequests = successRequests + failedRequests;
+	if (totalRequests === 0) {
+		return 0;
+	}
+	return (successRequests / totalRequests) * 100;
+};
 
 //The next axios instance to use
-export function getNextInstance() {
+export async function getNextInstance() {
 	if (instances.length === 0) return null;
-	const instance = instances[currentInstanceIndex];
-	currentInstanceIndex = (currentInstanceIndex + 1) % instances.length;
-	return instance;
+	// Sort the proxies by success rate
+	const sortedProxies = proxies.sort((a, b) =>
+		calculateSuccessRate(a.successRequest, a.failedRequests) < calculateSuccessRate(b.successRequest, b.failedRequests)
+			? 1
+			: -1
+	);
+	const unUsedProxy = proxies.find((proxy) => proxy.failedRequests + proxy.successRequest === 0);
+	if (unUsedProxy) return await createAxiosInstance(unUsedProxy);
+	for (let filterStep = 0.8; filterStep > 0.1; filterStep = filterStep - 0.1) {
+		const filteredProxies = sortedProxies.filter(
+			(proxy) => calculateSuccessRate(proxy.successRequest, proxy.failedRequests) > filterStep
+		);
+		if (filteredProxies.length > 0) {
+			const shuflledProxies = filteredProxies.sort((_) => Math.random - 0.5);
+			return await createAxiosInstance(shuflledProxies[0]);
+		}
+	}
+	return await createAxiosInstance(sortedProxies[0]);
 }
 
 export async function useLocalIp() {
