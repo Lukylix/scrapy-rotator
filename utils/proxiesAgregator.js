@@ -60,6 +60,10 @@ function writeProxiesToFile(proxies, filePath) {
 }
 
 function readProxiesFromDirectoryRecursive(directoryPath) {
+	if (!fs.existsSync(directoryPath)) {
+		fs.mkdirSync(directoryPath, { recursive: true });
+		return [];
+	}
 	let proxies = [];
 	const files = fs.readdirSync(directoryPath);
 	files.forEach((file) => {
