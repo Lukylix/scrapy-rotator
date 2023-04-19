@@ -4,90 +4,31 @@ import { getFilePath } from "../../utils/getFilepath.js";
 import fs from "fs";
 import dotenv from "dotenv";
 import { writeFileSync } from "../../utils/writeFileSync.js";
+import { parseCPUsList, parseCPUInfos } from "../../parsers/cpuBenchmark.js";
 
 dotenv.config();
 
 await getCompatibleProxies(process.env.BENCHMARK_SITE);
+
 export default async function main(proxies) {
 	try {
 		await intialise(proxies);
 		const instance = await getNextInstance();
-		console.log("Instance :", instance);
 		let cpus = [];
-		const res = await instance.get(`${process.env.BENCHMARK_SITE}/socketType.html#i32`);
+		const requestUrl = `${process.env.BENCHMARK_SITE}/socketType.html#i32`;
+		const res = await instance.get(requestUrl);
 		const $ = cheerio.load(res.data);
-		console.log(`Fecthed: ${process.env.BENCHMARK_SITE}/socketType.html#i32`);
+		console.log(`Fecthed: ${requestUrl}`);
 
-		$(".chartlist li").each((i, el) => {
-			const name = $(el).find(".prdname").text().trim();
-			const sThread = parseInt($(el).find(".count").text().trim().replace(/,/g, ""));
-			const price =
-				parseFloat(
-					$(el)
-						.find(".price-neww")
-						.text()
-						.trim()
-						.replace(/[\$\*]/g, "")
-				) || "NA";
-			const link = process.env.BENCHMARK_SITE + "/" + $(el).find("> a").attr("href");
-			cpus.push({ name, sThread, price, link });
-		});
-
-		const minSThread = 3432;
-		cpus = cpus.filter((cpu) => cpu.sThread >= minSThread && cpu.price !== "NA");
+		cpus = await parseCPUsList($);
 		cpus.sort((a, b) => b.sThread - a.sThread);
 		const cpuPromises = cpus.map(async (cpu, index) => {
 			try {
 				const instance = await getNextInstance();
 				if (instance === null) throw new Error("No more instances available");
 				const res = await instance.get(cpu.link);
-
 				const $ = cheerio.load(res.data);
-
-				const body = $(".ov-scroll");
-
-				const findByStrong = (text) =>
-					body.find(`strong:contains(${text})`).parent().text().replace(new RegExp(text, "g"), "").trim();
-				const findNextTextNodeByStrong = (text) => {
-					const nodes = body
-						.find(`strong:contains(${text})`)
-						.parent()
-						.contents()
-						.filter(() => true);
-					for (let i = 0; i < nodes.length; i++) {
-						const node = cheerio.load(nodes[i]);
-						if (node.text().trim() === text) return nodes[i + 1].data.trim();
-					}
-					return "";
-				};
-
-				const graphics = findByStrong("Description:");
-				const type = findByStrong("Class:");
-				const socket = findByStrong("Socket:");
-				const cores = findNextTextNodeByStrong("Cores:");
-				const threads = findNextTextNodeByStrong("Threads:");
-				const clockSpeed = findByStrong("Clockspeed:");
-				const turboSpeed = findByStrong("Turbo Speed:");
-				const tdp = findByStrong("Typical TDP:");
-				const tdpMax = findByStrong("TDP Up:");
-				const mark = body.find(".speedicon").next().text().trim();
-				const sThreadMark = findNextTextNodeByStrong("Single Thread Rating:");
-
-				console.log(`Fetched: ${cpu.link}`);
-				return {
-					...cpu,
-					graphics,
-					type,
-					socket,
-					cores,
-					threads,
-					clockSpeed,
-					turboSpeed,
-					tdp,
-					tdpMax,
-					mark,
-					sThreadMark,
-				};
+				return await parseCPUInfos({ $, cpu });
 			} catch (error) {
 				console.log(error);
 			}

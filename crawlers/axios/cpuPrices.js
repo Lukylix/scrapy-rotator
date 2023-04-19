@@ -4,6 +4,8 @@ import { getFilePath } from "../../utils/getFilepath.js";
 import dotenv from "dotenv";
 import fs from "fs";
 import { writeFileSync } from "../../utils/writeFileSync.js";
+import { parseCPUsPage } from "../../parsers/cpuPrices.js";
+import { matchAndAssignCPUPrices } from "../comon/matchAndAssignCPUPrices.js";
 
 dotenv.config();
 
@@ -17,53 +19,33 @@ export default async function main(proxies) {
 		await intialise(proxies);
 		// await useLocalIp();
 		await getCompatibleProxies(process.env.PRICE_SITE);
-		let nextPage = 0;
-		let cpusFounds = [];
-		if (skipFetching) cpusFounds = JSON.parse(fs.readFileSync(etFilePath("../data/cpusPrices.json")));
+		let currentPage = 0;
+		let totalCpusFounds = [];
+		if (skipFetching) totalCpusFounds = JSON.parse(fs.readFileSync(etFilePath("../data/cpusPrices.json")));
 		if (!skipFetching)
-			while (nextPage >= 0) {
+			while (currentPage >= 0) {
 				try {
 					const instance = await getNextInstance();
-					let cpusFoundsBeforeLength = cpusFounds.length;
-					const res = await instance.get(
-						`${process.env.PRICE_SITE}/cpu?&pageSizeProducts=48&page=${encodeURIComponent(nextPage)}`
-					);
-					console.log(
-						`Fecthed: ${process.env.PRICE_SITE}/cpu?&pageSizeProducts=48&page=${encodeURIComponent(nextPage)}`,
-						nextPage
-					);
+					const requestUrl = `${process.env.PRICE_SITE}/cpu?&pageSizeProducts=48&page=${encodeURIComponent(
+						currentPage
+					)}`;
+					const res = await instance.get(requestUrl);
+					console.log(`Fecthed: ${requestUrl}`, currentPage);
 					const $ = cheerio.load(res.data);
-					$(".itemIn").each((i, el) => {
-						const productName = $(el).find("h3").text().trim();
-						const procductLink = $(el).find("h3 a").attr("href");
-						const price = $(el).find(".itemPrice .cenaDph strong").text();
-						if ((productName, price)) cpusFounds.push({ productName, procductLink, price });
-					});
-
-					nextPage = parseInt($(".navig > #buttonNextPage").attr("href")?.match(/(\d+)/)[1]);
-					if (cpusFoundsBeforeLength === cpusFounds.length) nextPage = -1;
+					const [cpusFounds, nextPage] = await parseCPUsPage($);
+					totalCpusFounds = [...totalCpusFounds, ...cpusFounds];
+					currentPage = nextPage;
 				} catch (error) {
 					console.log(error);
-					nextPage = -1;
+					currentPage = -1;
 				}
 			}
-		cpus.forEach((cpu, i) => {
-			const name = cpu.name.replace(/AMD/g, "").trim();
-			const price = parseFloat(
-				cpusFounds
-					.find((cpu) => {
-						const nameArray = name.toLowerCase().split(" ");
-						return nameArray.every((word) => cpu.productName.toLowerCase().includes(word));
-					})
-					?.price.replace(/[€\s]/g, "")
-			);
+		cpus = matchAndAssignCPUPrices({ cpus, totalCpusFounds });
 
-			if (price) cpus[i] = { ...cpu, price };
-		});
 		if (!skipFetching)
-			writeFileSync(getFilePath("../../data/cpusPrices.json", import.meta.url), JSON.stringify(cpusFounds));
+			writeFileSync(getFilePath("../../data/cpusPrices.json", import.meta.url), JSON.stringify(totalCpusFounds));
 		writeFileSync(getFilePath("../../data/cpusWithPrice.json", import.meta.url), JSON.stringify(cpus));
-		console.log("CPUs founds:", cpusFounds.length);
+		console.log("CPUs founds:", totalCpusFounds.length);
 	} catch (error) {
 		console.log(error);
 	}
