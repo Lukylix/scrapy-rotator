@@ -11,7 +11,7 @@ dotenv.config();
 let cpus = [];
 let cpusInfos = [];
 async function scrapeList({ $, request, enqueueLinks }) {
-	cpus = await parseCPUsList();
+	cpus = await parseCPUsList($);
 	await enqueueLinks({
 		selector: ".chartlist li > a",
 	});

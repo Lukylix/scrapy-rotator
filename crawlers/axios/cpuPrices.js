@@ -1,5 +1,5 @@
 import cheerio from "cheerio";
-import { getNextInstance, getCompatibleProxies, useLocalIp, intialise } from "../../clients/proxiesClient.js";
+import { getNextInstance, getCompatibleProxies, useLocalIp, intialize } from "../../clients/proxiesClient.js";
 import { getFilePath } from "../../utils/getFilepath.js";
 import dotenv from "dotenv";
 import fs from "fs";
@@ -12,13 +12,14 @@ dotenv.config();
 const skipFetching = false;
 
 let cpus = JSON.parse(fs.readFileSync(getFilePath("../../data/cpus.json", import.meta.url)));
-console.log("CPUs ", cpus.length);
+console.log("CPUs already stored :", cpus.length);
+
+await getCompatibleProxies(process.env.PRICE_SITE);
 
 export default async function main(proxies) {
 	try {
-		await intialise(proxies);
+		await intialize(proxies);
 		// await useLocalIp();
-		await getCompatibleProxies(process.env.PRICE_SITE);
 		let currentPage = 0;
 		let totalCpusFounds = [];
 		if (skipFetching) totalCpusFounds = JSON.parse(fs.readFileSync(etFilePath("../data/cpusPrices.json")));
@@ -36,7 +37,6 @@ export default async function main(proxies) {
 					totalCpusFounds = [...totalCpusFounds, ...cpusFounds];
 					currentPage = nextPage;
 				} catch (error) {
-					console.log(error);
 					currentPage = -1;
 				}
 			}
@@ -46,7 +46,5 @@ export default async function main(proxies) {
 			writeFileSync(getFilePath("../../data/cpusPrices.json", import.meta.url), JSON.stringify(totalCpusFounds));
 		writeFileSync(getFilePath("../../data/cpusWithPrice.json", import.meta.url), JSON.stringify(cpus));
 		console.log("CPUs founds:", totalCpusFounds.length);
-	} catch (error) {
-		console.log(error);
-	}
+	} catch (error) {}
 }
