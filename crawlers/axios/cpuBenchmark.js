@@ -1,6 +1,6 @@
 import cheerio from "cheerio";
-import { getNextInstance, getCompatibleProxies, intialize } from "../../clients/proxiesClient.js";
-import { getFilePath } from "../../utils/getFilepath.js";
+import { getNextInstance, getCompatibleProxies, intialize } from "../../clients/axios.js";
+import { getFilePath } from "../../utils/getFilePath.js";
 import fs from "fs";
 import dotenv from "dotenv";
 import { writeFileSync } from "../../utils/writeFileSync.js";

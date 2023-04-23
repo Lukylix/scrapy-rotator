@@ -1,11 +1,12 @@
 import { CheerioCrawler } from "crawlee";
-import { getProxyConfiguration, setProxies } from "../../clients/proxiesClientCrawlee.js";
-import { getFilePath } from "../../utils/getFilepath.js";
+import { getProxyConfiguration, setProxies } from "../../clients/crawlee.js";
+import { getFilePath } from "../../utils/getFilePath.js";
 import fs from "fs";
 import dotenv from "dotenv";
 import { writeFileSync } from "../../utils/writeFileSync.js";
 import { parseCPUsPage } from "../../parsers/cpuPrices.js";
 import { matchAndAssignCPUPrices } from "../comon/matchAndAssignCPUPrices.js";
+import { readFileSync } from "../../utils/readFileSync.js";
 
 dotenv.config();
 
@@ -13,7 +14,7 @@ const maxPagesWithoutProduct = 5;
 const skipFetching = false;
 
 export default async function main(proxies) {
-	let cpus = JSON.parse(fs.readFileSync(getFilePath("../../data/cpus.json", import.meta.url)));
+	let cpus = JSON.parse(readFileSync(getFilePath("../../data/cpus.json", import.meta.url)));
 
 	console.log("CPUs :", cpus.length);
 
@@ -34,7 +35,7 @@ export default async function main(proxies) {
 	});
 
 	if (skipFetching)
-		totalCpusFounds = JSON.parse(fs.readFileSync(getFilePath("../../data/cpusPrices.json", import.meta.url)));
+		totalCpusFounds = JSON.parse(readFileSync(getFilePath("../../data/cpusPrices.json", import.meta.url)));
 	else {
 		await crawler.run([`${process.env.PRICE_SITE}/cpu?&pageSizeProducts=48&page=0`]);
 	}

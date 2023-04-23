@@ -1,7 +1,6 @@
 import { CheerioCrawler } from "crawlee";
-import { getProxyConfiguration, setProxies } from "../../clients/proxiesClientCrawlee.js";
-import { getFilePath } from "../../utils/getFilepath.js";
-import fs from "fs";
+import { getProxyConfiguration, setProxies } from "../../clients/crawlee.js";
+import { getFilePath } from "../../utils/getFilePath.js";
 import dotenv from "dotenv";
 import { writeFileSync } from "../../utils/writeFileSync.js";
 import { parseCPUInfos, parseCPUsList } from "../../parsers/cpuBenchmark.js";

@@ -1,13 +1,14 @@
 import axios from "axios";
 import fs from "fs";
 import cheerio from "cheerio";
-import { getFilePath } from "./getFilepath.js";
+import { getFilePath } from "./getFilePath.js";
 import dotenv from "dotenv";
 import { writeFileSync } from "fs";
+import { readFileSync } from "./readFileSync.js";
 
 dotenv.config();
 
-async function checkProxies(proxies) {
+export async function checkProxies(proxies) {
 	//unique ip set
 	const uniqueProxies = [...new Set(proxies.map(JSON.stringify))].map(JSON.parse);
 	const validProxies = [];
@@ -71,7 +72,7 @@ function readProxiesFromDirectoryRecursive(directoryPath) {
 		if (fs.statSync(filePath).isDirectory()) {
 			readProxiesFromDirectoryRecursive(filePath, proxies);
 		} else {
-			const lines = fs.readFileSync(filePath, "utf-8").split("\n");
+			const lines = readFileSync(filePath, "utf-8").split("\n");
 			lines.forEach((line) => {
 				line = line.trim();
 				if (line) {
@@ -104,11 +105,12 @@ export async function getFreeProxies() {
 				port: proxi.port,
 			});
 		});
+		proxies = proxies.filter((proxy) => proxy.ip.match(/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/));
 		await writeProxiesToFile(proxies, "../proxies/valid-proxies.txt");
 	} catch (error) {
 		console.log(error);
 	}
-	return await checkProxies(proxies);
+	return proxies;
 }
 
 export async function getPremiumProxies() {
@@ -137,7 +139,7 @@ export async function getPremiumProxies() {
 	} else {
 		proxies = proxies.sort(() => Math.random() - 0.5);
 	}
-
+	proxies = proxies.filter((proxy) => proxy.ip.match(/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/));
 	return proxies;
 }
 

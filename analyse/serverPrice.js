@@ -1,7 +1,7 @@
-import fs from "fs";
+import { readFileSync } from "../utils/readFileSync";
 
 // Only work with Epyc for now
-let cpus = JSON.parse(fs.readFileSync("./data/cpusWithPrice.json"));
+let cpus = JSON.parse(readFileSync("./data/cpusWithPrice.json"));
 const prices = {
 	ram: 6558.96,
 	nvme: 1788.96,
