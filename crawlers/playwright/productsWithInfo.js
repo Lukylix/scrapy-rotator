@@ -41,7 +41,7 @@ export function refactorProducts(products) {
 			});
 		let perUnitPrice = {};
 		if (product.perUnitPrice !== "") {
-			const regex = /^(\d+)\s?(\S+)\D+(\s+)(\d+\.\d+)\s*€\s*\/\s*(\w+)/gm;
+			const regex = /^(\d+)\s?(\S+)\D+\s+(\d+\.\d+)\s*€\s*\/\s*(\w+)/gm;
 			const match = regex.exec(product.perUnitPrice.trim());
 			let quantity2, unit2, pricePer, pricePerUnit;
 			if (match !== null) {
