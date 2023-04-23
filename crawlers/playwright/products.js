@@ -108,8 +108,9 @@ export default async function main(proxies) {
 		},
 	});
 	await crawlerCheerio.run([
-		`${process.env.CATALOGUES_SITE}/api/v2/stores?latitude=43.861721&longitude=4.374104237499999`,
+		// `${process.env.CATALOGUES_SITE}/api/v2/stores?latitude=43.861721&longitude=4.374104237499999`,
+		`${process.env.SUPERMARKET_SITE}/r?page=1`,
 	]);
-	writeFileSync(getFilePath("../../data/responses.json", import.meta.url), JSON.stringify(responses));
 	writeFileSync(getFilePath("../../data/products.json", import.meta.url), JSON.stringify(products));
+	writeFileSync(getFilePath("../../data/responses.json", import.meta.url), JSON.stringify(responses));
 }

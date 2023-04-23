@@ -35,7 +35,6 @@ if (!process.env.IS_DOCKER)
 		},
 	]);
 
-console.log(process.env.TASK);
 if (process.env.TASK === "cpu-benchmark") {
 	answers.taches.push("Recuperer le score des proceseurs");
 } else if (process.env.TASK === "cpu-prices") {
@@ -77,15 +76,14 @@ if (willCrawl && !process.env.IS_DOCKER) {
 	const answerCrawll = await inquirer.prompt(prompt);
 	answers = { ...answers, ...answerCrawll };
 }
-console.log(process.env.BACKEND);
+
 if (process.env.BACKEND === "crawlee") {
 	answers.backend = "crawlee";
-} else if (process.env.BACKEND) {
-	answers.backend = "crawlee";
-} else if (process.env.BACKEND) {
-	answers.backend = "crawlee";
+} else if (process.env.BACKEND === "axios") {
+	answers.backend = "axios";
+} else if (process.env.BACKEND === "playwright") {
+	answers.backend = "playwright";
 }
-console.log(process.env.PROXIES);
 if (process.env.PROXIES === "free") {
 	answers.proxies.push("Free");
 } else if (process.env.PROXIES === "premium") {
