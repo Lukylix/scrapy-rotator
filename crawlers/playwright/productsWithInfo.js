@@ -53,7 +53,6 @@ export function refactorProducts(products) {
 			}
 
 			perUnitPrice = { quantity: quantity2, unit: unit2, pricePer, pricePerUnit };
-			console.log("perUnitPrice", product.perUnitPrice, perUnitPrice);
 		}
 		return { ...product, perUnitPrice, nutricionalValues: nutricionalValuesObject };
 	});
