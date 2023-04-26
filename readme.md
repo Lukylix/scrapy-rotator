@@ -27,20 +27,14 @@ docker build . -t scrapy
 To run the container you will need to pass TASK, BACKEND and PROXIES environement letible like so :
 
 ```bash
-docker run -v ${pwd}/data:/app/data -e TASK=products-supermarket -e BACKEND=playwright -e PROXIES=premium scrapy
+docker run -v ${pwd}/data:/app/data -e TASKS=products-supermarket,playwright -e PROXIES=premium scrapy -e STORAGE=db
 ```
 
-Here is a list of possible env values :
-
-```js
-TASKS = ["products-infos", "products-supermarket", "cpu-benchmark", "cpu-prices"];
-BACKENDS = ["axios", "crawlee", "playwrite"];
-PROXIES = ["free", "premium"];
-```
+You can see common/utils/choicesDefinition.js to see all the possible options
 
 ## Setting up
 
-You will need to create and populate the .env file for the scraping to work :
+You will need to create and populate the .env file for the scraping to work.
 
 ## Frontend
 

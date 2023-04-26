@@ -9,8 +9,7 @@ import {
 import { getFreeProxies, getPremiumProxies } from "../../scrapyRotator/utils/index.js";
 
 export const tasks = [
-	{ value: "alastic-build", name: "Build ElasticSearch images", for: "docker", checked: true },
-	{ value: "elastic-run", name: "Run ElasticSearch", for: "docker", checked: true },
+	{ value: "elastic-run", name: "Run ElasticSearch", for: "elasticsearch", checked: true },
 	{ value: "backend", name: "Lancer l'API", for: "backend", checked: true },
 	{ value: "frontend", name: "Lancer le frontend", for: "frontend", checked: true, depends: ["backend"] },
 

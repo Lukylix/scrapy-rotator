@@ -86,7 +86,7 @@ function readProxiesFromDirectoryRecursive(directoryPath) {
 }
 
 export async function getFreeProxies() {
-	let proxies = readProxiesFromDirectoryRecursive(getFilePath("../proxies/free", import.meta.url));
+	let proxies = readProxiesFromDirectoryRecursive(getFilePath("../../common/data/proxies/free", import.meta.url));
 	try {
 		const sslproxies = await axios.get("https://sslproxies.org/");
 		const $ = cheerio.load(sslproxies.data);
@@ -106,7 +106,7 @@ export async function getFreeProxies() {
 			});
 		});
 		proxies = proxies.filter((proxy) => proxy.ip.match(/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/));
-		await writeProxiesToFile(proxies, "../proxies/valid-proxies.txt");
+		await writeProxiesToFile(proxies, "../../common/data/proxies/valid-proxies.txt");
 	} catch (error) {
 		console.log(error);
 	}
@@ -114,15 +114,15 @@ export async function getFreeProxies() {
 }
 
 export async function getPremiumProxies() {
-	let proxies = readProxiesFromDirectoryRecursive(getFilePath("../proxies/premium", import.meta.url));
+	let proxies = readProxiesFromDirectoryRecursive(getFilePath("../../common/data/proxies/premium", import.meta.url));
 	console.log("proxies", proxies.length);
-	if (proxies.length === 0) {
+	if (proxies.length < 1) {
 		const proxiesReponse = await axios.get(
 			`https://api.proxyscrape.com/v2/account/datacenter_shared/proxy-list?auth=${process.env.API_KEY}&type=getproxies&country[]=all&protocol=http&format=normal&status=online`
 		);
 		const proxiesString = proxiesReponse.data;
 		fs.writeFileSync(
-			getFilePath("../proxies/premium/proxyscrape_premium_http_proxies.txt", import.meta.url),
+			getFilePath("../../common/data/proxies/premium/proxyscrape_premium_http_proxies.txt", import.meta.url),
 			proxiesString
 		);
 		proxies = proxiesString.split("\r\n");

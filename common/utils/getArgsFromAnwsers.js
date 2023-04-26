@@ -1,10 +1,9 @@
 import { tasks } from "./choicesDefinition.js";
 
-export function getArgsFromAnswers(answers) {
+export function getArgsFromAnswers(answers = { tasks: [], proxies: [], backends: {} }) {
 	let argsTasks = {};
 	let argsTasksBackend = ["-b", "playwright"];
-
-	for (const task of answers.tasks) {
+	for (const task of [...answers.tasks]) {
 		const taskObject = tasks.find((t) => t.value === task);
 		if (taskObject && taskObject.for !== task)
 			argsTasks[taskObject.for] = [...(argsTasks[taskObject.for] || ["-t"]), task];

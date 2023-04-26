@@ -1,10 +1,14 @@
 import { spawn } from "child_process";
 import { askAnswers, getAnswersFromArgs, getArgsFromAnswers } from "./common/utils/index.js";
 import dotenv from "dotenv";
+import { getAnswersFromEnv } from "./common/utils/getAnswersFromEnv.js";
+import { getEnvArgsFromAnwsers } from "./common/utils/getEnvArgsFromAnswer.js";
 
 dotenv.config();
 
-function startChildProcess(command, args, name = "") {
+const noLogsFor = ["elasticsearch"];
+
+async function startChildProcess(command, args, name = "") {
 	let child;
 	child = spawn(command, args, { env: process.env });
 
@@ -23,21 +27,41 @@ function startChildProcess(command, args, name = "") {
 	child.on("error", (err) => {
 		console.error(`Error in child process ${name}: ${err.message}`);
 	});
-
-	child.stdout.on("data", (data) => {
-		console.log(name, ": ", data.toString());
-	});
+	if (!noLogsFor.includes(name.toLowerCase()))
+		child.stdout.on("data", (data) => {
+			console.log(`${name ? `${name} :` : ""}${data.toString()}`);
+		});
 
 	child.stderr.on("data", (data) => {
-		console.error(`${name} error: ${data.toString()}`);
+		console.error(`${name} error: ${data.toString().replace(/\n/gm, "")}`);
 	});
-	return child;
+	// Forward SIGINT signal to child process
+	process.on("SIGINT", () => {
+		console.log(`Received SIGINT signal. Killing child process ${name}...`);
+		child.kill("SIGINT");
+		process.exit();
+	});
 }
 
-let answers = getAnswersFromArgs();
+let answers = getAnswersFromEnv();
+answers = { ...answers, ...getAnswersFromArgs(answers) };
 
 // Ask for for missing answers
 answers = await askAnswers(answers);
 
 const argsTasks = getArgsFromAnswers(answers);
-const childScrapy = startChildProcess("node", ["./scrapyRotator/index.js", ...argsTasks.scrapy], "Scrapy");
+if (process.env.IS_DOCKER) console.log("Running in docker runing sub containers is not implemented yet");
+if (argsTasks.elasticsearch && !process.env.IS_DOCKER)
+	startChildProcess("docker", ["compose", "-f", "./elasticsearch/docker-compose.yml", "up"], "Elasticsearch");
+if ((argsTasks.scrapy && !answers?.playwrightInDocker) || (argsTasks.scrapy && process.env.IS_DOCKER))
+	startChildProcess(
+		"node",
+		["./scrapyRotator/index.js", ...argsTasks.scrapy],
+		process.env.IS_DOCKER ? undefined : "Scrapy"
+	);
+if (argsTasks.scrapy && answers?.playwrightInDocker && !process.env.IS_DOCKER)
+	startChildProcess(
+		"docker",
+		["run", "-v", "./common/data:/app/common/data", ...getEnvArgsFromAnwsers(answers), "scrapy"],
+		process.env.IS_DOCKER ? undefined : "Scrapy"
+	);

@@ -1,16 +1,20 @@
+import { getAnswersFromEnv } from "../common/utils/getAnswersFromEnv.js";
 import { getAnswersFromArgs, choicesDefinition } from "../common/utils/index.js";
 
 let proxies = [];
 
-let answers = getAnswersFromArgs();
+let answers = getAnswersFromEnv();
+console.log("answers from env", answers);
+answers = { ...answers, ...getAnswersFromArgs(answers) };
 
-console.log("answers.proxies", answers.proxies);
+console.log("answers scrapy rotator", answers);
 if (answers.proxies && answers.proxies.length > 0) {
 	for (const proxy of answers.proxies) {
-		proxies = [...proxies, ...(await choicesDefinition.proxies.find((p) => p.value === proxy).get())];
+		const proxyObject = choicesDefinition.proxies.find((p) => p.value === proxy);
+		console.log("proxyObject", proxyObject);
+		proxies = [...proxies, ...(await proxyObject.get())];
 	}
 }
-
 for (const task of answers.tasks) {
 	let taskObject = choicesDefinition.tasks.find((t) => t.value === task);
 	if (!taskObject) continue;
