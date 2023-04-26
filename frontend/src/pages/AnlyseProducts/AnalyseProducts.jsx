@@ -1,45 +1,35 @@
-import { DataList } from "../../../components/DataList/DataList";
+import { DataList } from "../../components/DataList";
 import "./css/normalizer.css";
 import "./css/style.css";
 
-import productsWithInfos from "../../../../data/productsWithInfos.json";
-import { useMemo, useState } from "react";
+import productsWithInfos from "../../../../common/data/productsWithInfos.json";
+import { useEffect, useMemo, useState } from "react";
 
 const pageSize = 50;
 
 export function AnalyseProducts() {
 	console.log("Analyse Render");
-	const [ingredientsSelected, setIngredientSelected] = useState([]);
+	const [ingredientsSelected, setIngredientsSelected] = useState([]);
 	const [search, setSearch] = useState("");
 	const [pageNumber, setPageNumber] = useState(1);
 	const [sortByKcal, setSortByKcal] = useState(false);
+
+  useEffect(()=>{
+    console.log("Selecteds :" , ingredientsSelected)
+  }, [ingredientsSelected])
+
 	const productWords = useMemo(() => {
 		let products = [];
-		productsWithInfos.forEach((product) => (products = [...products, ...product.name.split(" ")]));
+		productsWithInfos.forEach((product) => (products = [...products, ...product.name.toLowerCase().split(" ")]));
 		return [...new Set(products)];
 	}, [productsWithInfos]);
 
-	const produitWithValues = useMemo(() => {
-		return productsWithInfos.map((product) => {
-			let nutricionalValuesObject = {};
-			if (product.nutricionalValues)
-				Object.keys(product.nutricionalValues).forEach((nutricionalkey) => {
-					const nutricionalValue = product.nutricionalValues[nutricionalkey];
-					const key = nutricionalNamesDic[nutricionalValue.name] || nutricionalValue.name;
-					const [nutricionalValueText, perQuantity] = nutricionalValue.value.split("/");
-					const [value, unit] = nutricionalValueText?.split(" ") || [nutricionalValueText, ""];
-					const [quantity, quantityUnit] = perQuantity?.split(" ") || [perQuantity, ""];
-					nutricionalValuesObject[key] = { value, unit, quantity: { value: quantity, unit: quantityUnit } };
-				});
-			return { ...product, nutricionalValues: nutricionalValuesObject };
-		});
-	}, [productsWithInfos]);
 
 	const productsAfterSearch = useMemo(() => {
-		if (search.length < 2) return produitWithValues;
+		if (search.length < 2) return productsWithInfos;
 		const searchTerms = search.toLowerCase().split(" ");
 		let results = [];
-		for (const product of produitWithValues) {
+		for (const product of productsWithInfos) {
 			let areWorldsFound = true;
 			for (const searchTerm of searchTerms) {
 				// If a search term is not found in the recipe name or description
@@ -59,17 +49,17 @@ export function AnalyseProducts() {
 		// If all search terms are found in the recipe, add it to the results array
 
 		return results;
-	}, [search]);
+	}, [search, productsWithInfos]);
 
 	const productsAfterTags = useMemo(() => {
 		const results = [];
 
 		for (const product of productsAfterSearch) {
 			let tagsFound = true;
-			// Get all the ingredients from the recipe into a single string
 			for (const selected of ingredientsSelected) {
-				if (product.ingredients)
-					if (!product.ingredients.toLowerCase().includes(selected.toLowerCase())) {
+        // Get all the worlds into a single string
+        const productString = `${product.ingredients} ${product.name}` 
+					if (!productString.toLowerCase().includes(selected.toLowerCase())) {
 						// The recipe is not added to the results
 						tagsFound = false;
 						// Stop checking the current tag and then the recipe
@@ -82,35 +72,25 @@ export function AnalyseProducts() {
 
 		return results;
 	}, [productsAfterSearch, ingredientsSelected]);
+
 	const productsAfterSort = useMemo(() => {
 		if (!sortByKcal) return productsAfterTags;
+    console.log("Filter products");
 		let productsCopy = [...productsAfterTags];
-		productsCopy.sort((a, b) => {
-			const regex = /^(\d+)\s*(\w+)\D+(\d+\.\d+)\s*€\s*\/\s*(\w+)/g;
-			const aPerUnitPriceMatches = regex.exec(a.perUnitPrice);
-			const bPerUnitPriceMatches = regex.exec(b.perUnitPrice);
-
-			if (!aPerUnitPriceMatches) return 0;
-			if (!bPerUnitPriceMatches) return 0;
-			console.log({ aPerUnitPriceMatches, bPerUnitPriceMatches });
-			const [, aQuantity, aUnit, aPrice, aPriceUnit] = aPerUnitPriceMatches;
-			const [, bQuantity, bUnit, bPrice, bPriceUnit] = bPerUnitPriceMatches;
-			if (aPriceUnit !== "KG") return 0;
-			if (bPriceUnit !== "KG") return 0;
-			if (!a.nutricionalValues.kcal) return 0;
-			if (!b.nutricionalValues.kcal) return 0;
-			const aKcalPerkilos = (a.nutricionalValues.kcal * 100) / parseFloat(aPrice);
-			const bKcalPerkilos = (b.nutricionalValues.kcal * 100) / parseFloat(bPrice);
-			return bKcalPerkilos - aKcalPerkilos;
+		return productsCopy.filter((product) => (product.nutricionalValues.kcal && product.perUnitPrice.pricePerUnit === "KG")).sort((a, b) => {
+			const aKcalPerPrice = parseInt(a.nutricionalValues.kcal) * 10 / parseFloat(a.perUnitPrice.pricePer);
+      const bKcalPerPrice = parseInt(b.nutricionalValues.kcal) * 10 / parseFloat(b.perUnitPrice.pricePer);
+      return aKcalPerPrice - bKcalPerPrice;
 		});
-		return productsCopy;
 	}, [productsAfterTags, sortByKcal]);
+
 	const productsAfterPagination = useMemo(() => {
+    console.log("Pagination");
 		return productsAfterSort.slice((pageNumber - 1) * pageSize, pageNumber * pageSize);
 	}, [productsAfterSort, pageNumber]);
 
 	const removeIngredientSelected = (value) => {
-		setIngredientSelected((selecteds) => selecteds.filter((selected) => selected !== value));
+		setIngredientsSelected((selecteds) => selecteds.filter((selected) => selected !== value));
 	};
 	return (
 		<main>
@@ -128,7 +108,7 @@ export function AnalyseProducts() {
 			<button onClick={() => setSortByKcal((sortByKcal) => !sortByKcal)}>Sort by kcal</button>
 			<div className="tags">
 				{ingredientsSelected
-					.filter((ingredient) => ingredient.includes("/"))
+					.filter((ingredient) => !ingredient.includes("/"))
 					.map((ingredient, i) => (
 						<span className="tag ingredients" key={i} onClick={() => removeIngredientSelected(ingredient.trim())}>
 							{ingredient.trim()}
@@ -136,13 +116,13 @@ export function AnalyseProducts() {
 					))}
 			</div>
 
-			<DataList data={productWords} setSelecteds={setIngredientSelected} selectedCallBack={() => true} />
+			<DataList data={productWords} setSelecteds={setIngredientsSelected} selectedCallBack={() => true} />
 
 			<section id="card-container">
 				{productsAfterPagination.map((product, i) => (
 					<div className="card" key={i}>
 						<h2>
-							{product.name} {product.price}€ {product.perUnitPrice}
+							{product.name} {product.price}€ {product.perUnitPrice.pricePer} / {product.perUnitPrice.pricePerUnit}
 						</h2>
 						{/* {product.ingredients ? (
 							<ul>
