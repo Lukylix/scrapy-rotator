@@ -1,6 +1,6 @@
 # Srapy-rotator
 
-My personnal scraping playground with rotating proxies and letious backends/methods of scraping.
+My personnal scraping playground with rotating proxies and various backends/methods of scraping.
 This project is intented as a starting point for my futur crawling needs.
 
 ## NodeJS
