@@ -1,0 +1,55 @@
+.pagination {
+	display: flex;
+	flex-grow: 1;
+	bottom: 0;
+	left: 50%;
+	transform: translateX(-50%);
+	justify-content: center;
+	align-items: center;
+	margin: 50px auto;
+}
+
+.pagination * {
+	margin: 0 10px;
+	width: 40px;
+	height: 40px;
+	line-height: 40px;
+	font-size: x-large;
+	text-decoration: none;
+	text-align: center;
+	cursor: pointer;
+	color: white;
+	font-weight: bolder;
+	border: 2px solid white;
+	border-radius: 5px;
+}
+
+.pagination .activePage {
+	color: #6126b4;
+	background-color: white;
+}
+
+.pagination i,
+.pagination a {
+	cursor: default;
+}
+
+@media screen and (max-width: 550px) {
+	.pagination > * {
+		margin: 0 5px;
+		width: 30px;
+		height: 30px;
+		line-height: 30px;
+		font-size: large;
+	}
+}
+
+@media screen and (max-width: 424px) {
+	.pagination > * {
+		margin: 0 5px;
+		width: 20px;
+		height: 20px;
+		line-height: 20px;
+		font-size: medium;
+	}
+}

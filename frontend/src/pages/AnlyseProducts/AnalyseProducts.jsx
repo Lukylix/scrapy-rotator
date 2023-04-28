@@ -5,6 +5,7 @@ import "./css/style.css";
 import { useEffect, useState } from "react";
 import { waitForApi, getProducts, getSortProperties, getFilterProperties } from "../../../../common/utils/api.js";
 import Select from "react-select";
+import Pagination from "../../components/Pagination/Pagination";
 
 const operatorsDics = {
 	eq: "=",
@@ -17,7 +18,6 @@ const operatorsDics = {
 
 export function AnalyseProducts() {
 	const [productsWithInfos, setProductsWithInfos] = useState([]);
-	const [ingredientsSelected, setIngredientsSelected] = useState([]);
 	const [sortProperties, setSortProperties] = useState([]);
 	const [slectedSortProperties, setSelectedSortProperties] = useState([]);
 	const [filterValue, setFilterValue] = useState("");
@@ -30,6 +30,7 @@ export function AnalyseProducts() {
 	const [selectedOperator, setSelectedOperator] = useState("");
 	const [search, setSearch] = useState("");
 	const [pageNumber, setPageNumber] = useState(1);
+	const [totalPages, setTotalPages] = useState(1);
 	const [apiReady, setApiReady] = useState(false);
 
 	useEffect(() => {
@@ -60,14 +61,10 @@ export function AnalyseProducts() {
 			console.log("Fetching products..");
 			const productsPage = await getProducts(pageNumber, search, slectedSortProperties, selectedFilters);
 			const products = productsPage?.products;
+			setTotalPages(productsPage?.totalPages);
 			if (products) setProductsWithInfos(products);
-			console.log(products);
 		})();
-	}, [ingredientsSelected, apiReady, pageNumber, search, slectedSortProperties, selectedFilters]);
-
-	const removeIngredientSelected = (value) => {
-		setIngredientsSelected((selecteds) => selecteds.filter((selected) => selected !== value));
-	};
+	}, [apiReady, pageNumber, search, slectedSortProperties, selectedFilters]);
 
 	const removeSelectedSortProperty = (value) => {
 		setSelectedSortProperties((selecteds) => selecteds.filter((selected) => selected !== value));
@@ -131,7 +128,6 @@ export function AnalyseProducts() {
 						))}
 					</div>
 
-					{/* <DataList data={productWords} setSelecteds={setIngredientsSelected} selectedCallBack={() => true} /> */}
 					<DataList
 						name="sort"
 						placeholder="Sort by..."
@@ -170,6 +166,8 @@ export function AnalyseProducts() {
 						<button onClick={addFilter}>Add filter</button>
 					</div>
 
+					<Pagination page={pageNumber} totalPage={totalPages} setPage={setPageNumber} />
+
 					<section id="card-container">
 						{productsWithInfos.map((product, i) => (
 							<div className="card" key={i}>
@@ -191,26 +189,23 @@ export function AnalyseProducts() {
 											}}
 										/>
 									)}
+									<div className="prices">
+										<span className="price">{product.price}€</span>
+										{product?.perUnitPrice?.pricePer && product?.perUnitPrice?.pricePerUnit && (
+											<span className="price-per-unit">
+												{product?.perUnitPrice?.pricePer}€ / {product?.perUnitPrice?.pricePerUnit}
+											</span>
+										)}
+									</div>
 								</figure>
 								<figcaption>
-									{product.name} {product.price}€ {product.perUnitPrice.pricePer} / {product.perUnitPrice.pricePerUnit}
+									{product.name}
 									<p>{product.description}</p>
-									{/* <ul>
-							{Object.keys(product.nutricionalValues).map((key, i) => {
-								const value = product.nutricionalValues[key];
-								return (
-									<li key={i}>
-										{value.value} {value.unit}
-									</li>
-								);
-							})}
-						</ul> */}
 								</figcaption>
 							</div>
 						))}
 					</section>
-					<button onClick={() => setPageNumber(pageNumber - 1)}>Previous page</button>
-					<button onClick={() => setPageNumber(pageNumber + 1)}>Next Page</button>
+					<Pagination page={pageNumber} totalPage={totalPages} setPage={setPageNumber} />
 				</>
 			)}
 		</main>
