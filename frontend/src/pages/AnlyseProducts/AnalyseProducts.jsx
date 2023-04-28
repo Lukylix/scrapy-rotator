@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { waitForApi, getProducts, getSortProperties, getFilterProperties } from "../../../../common/utils/api.js";
 import Select from "react-select";
 import Pagination from "../../components/Pagination/Pagination";
+import { ReactComponent as Visibility } from "../../assets/visibility.svg";
 
 const operatorsDics = {
 	eq: "=",
@@ -103,7 +104,6 @@ export function AnalyseProducts() {
 						/>
 						<i className="fas fa-search"></i>
 					</label>
-
 					{slectedSortProperties.length > 0 && <h3>Sort</h3>}
 					<div className="tags">
 						{slectedSortProperties.map((sortProperty, i) => (
@@ -112,7 +112,7 @@ export function AnalyseProducts() {
 							</span>
 						))}
 					</div>
-					{selectedFilters.length > 0 && <h3>Filters</h3>}
+					Visibility {selectedFilters.length > 0 && <h3>Filters</h3>}
 					<div className="tags">
 						{selectedFilters.map((filterProperty, i) => (
 							<span
@@ -127,7 +127,6 @@ export function AnalyseProducts() {
 							</span>
 						))}
 					</div>
-
 					<DataList
 						name="sort"
 						placeholder="Sort by..."
@@ -165,9 +164,7 @@ export function AnalyseProducts() {
 						<input type="text" value={filterValue} onChange={(e) => setFilterValue(e.target.value)} />
 						<button onClick={addFilter}>Add filter</button>
 					</div>
-
 					<Pagination page={pageNumber} totalPage={totalPages} setPage={setPageNumber} />
-
 					<section id="card-container">
 						{productsWithInfos.map((product, i) => (
 							<div className="card" key={i}>
@@ -201,6 +198,14 @@ export function AnalyseProducts() {
 								<figcaption>
 									{product.name}
 									<p>{product.description}</p>
+									<a
+										href={`https://${new URL(product.image || product.images).hostname.replace("media.", "")}${
+											product.link
+										}`}
+										className="view-button"
+									>
+										<Visibility fill="white" />
+									</a>
 								</figcaption>
 							</div>
 						))}

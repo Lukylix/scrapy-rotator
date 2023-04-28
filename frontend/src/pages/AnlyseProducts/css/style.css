@@ -71,17 +71,18 @@ input {
 	height: 300px;
 	border-radius: 10px;
 	overflow: hidden;
+	box-shadow: 0 0 5px 5px #00000025;
 }
 
 #card-container .card figure {
-	height: 70%;
+	height: 60%;
 	width: 100%;
 	background-color: #c7bebe;
 }
 #card-container .card figure img {
 	height: 100%;
 	width: 100%;
-	object-fit: cover;
+	object-fit: contain;
 }
 
 #card-container .card figure .prices {
@@ -102,6 +103,7 @@ input {
 	color: white;
 	padding: 5px;
 	border-radius: 10px 0 0 0;
+	box-shadow: 0 0 5px 5px #00000025;
 }
 
 #card-container .card figure .prices .price-per-unit {
@@ -110,12 +112,14 @@ input {
 	color: white;
 	padding: 5px;
 	border-radius: 10px 0 0 0;
+	box-shadow: 0 0 5px 5px #00000025;
 }
 #card-container .card figcaption {
-	height: 30%;
+	height: 40%;
 	width: 100%;
 	padding: 15px;
 	background-color: #282c34;
+	padding-bottom: 50px;
 }
 
 #card-container .card h2 {
@@ -205,4 +209,18 @@ input[list] {
 	background-color: #68d9a4;
 	border-radius: 5px;
 	padding: 5px;
+}
+
+.view-button {
+	position: absolute;
+	bottom: 10px;
+	right: 10px;
+	background-color: #ef720f;
+	border-radius: 10px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 40px;
+	line-height: 40px;
+	padding: 10px;
 }
