@@ -11,7 +11,9 @@ COPY  . .
 
 WORKDIR /app/backend
 RUN npm install
-WORKDIR /frontend
+WORKDIR /app/frontend
+RUN npm install
+WORKDIR /app/scrapyRotator
 RUN npm install
 WORKDIR /app
 

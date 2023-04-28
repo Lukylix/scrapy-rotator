@@ -24,6 +24,6 @@ for (const task of answers.tasks) {
 		}
 		await taskObject.get[taskObject.backend](proxies);
 	} else {
-		await taskObject.do();
+		await taskObject?.do();
 	}
 }

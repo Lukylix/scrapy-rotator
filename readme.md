@@ -10,6 +10,9 @@ To run the NodeJS application, execute the following commands in your terminal: 
 ```bash
 npx playwright install
 yarn install
+yarn --cwd ./scrapyRotator
+yarn --cwd ./backend
+yarn --cwd ./frontend
 node index.js
 ```
 
@@ -22,12 +25,13 @@ Thanks to inquirer !
 
 ```bash
 docker build . -t scrapy
+dokcer build ./ealsticsearch -t ealsticsearch
 ```
 
-To run the container you will need to pass TASKS, BACKENDS and PROXIES environement letible like so :
+Running the container :
 
 ```bash
-docker run -v ${pwd}/data:/app/data -e TASKS=products-supermarket,playwright - BACKENDS=playwright,crawlee -e PROXIES=premium scrapy -e STORAGE=db
+ docker compose -f ./docker-compose.yml up
 ```
 
 You can see common/utils/choicesDefinition.js to see all the possible options
@@ -45,3 +49,13 @@ cd frontend
 yarn install
 yarn run dev
 ```
+
+## Screenshots
+
+### CLI
+
+![CLI](./screenshots/cli.png)
+
+### Frontend
+
+![Frontend](./screenshots/frontend.png)

@@ -80,11 +80,9 @@ async function startChildProcess(command, args, name = "", cronSchedule = null) 
 
 let answers = getAnswersFromEnv();
 answers = { ...answers, ...getAnswersFromArgs(answers) };
-
 // Ask for for missing answers
-answers = await askAnswers(answers);
+answers = { ...answers, ...(await askAnswers(answers)) };
 const argsTasks = getArgsFromAnswers(answers);
-console.log("argsTasks", argsTasks);
 if (process.env.IS_DOCKER) console.log("Running in docker runing sub containers is not implemented yet");
 if (argsTasks?.elasticsearch?.length > 0 && !process.env.IS_DOCKER)
 	startChildProcess("docker", ["compose", "-f", "./elasticsearch/docker-compose.yml", "up"], "Elasticsearch");

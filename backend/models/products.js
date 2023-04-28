@@ -65,7 +65,7 @@ const filterTypes = {
 		"pricePerQuantityPerKcal",
 	],
 	types: ["term", "range", "match"],
-	operationsRange: ["gt", "gte", "lt", "lte", "eq", "ne"],
+	operationsRange: ["gt", "gte", "lt", "lte"],
 };
 
 const getFilterProperties = () => {
