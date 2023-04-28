@@ -112,7 +112,7 @@ export function AnalyseProducts() {
 							</span>
 						))}
 					</div>
-					Visibility {selectedFilters.length > 0 && <h3>Filters</h3>}
+					{selectedFilters.length > 0 && <h3>Filters</h3>}
 					<div className="tags">
 						{selectedFilters.map((filterProperty, i) => (
 							<span
