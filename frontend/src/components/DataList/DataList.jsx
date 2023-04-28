@@ -2,7 +2,13 @@ import { useEffect, useRef, useState } from "react";
 
 import "./datalist.css";
 
-export function DataList({ data = [], setSelecteds = () => {}, selectedCallBack = () => {} }) {
+export function DataList({
+	name = "select",
+	placeholder = "Select",
+	data = [],
+	setSelecteds = () => {},
+	selectedCallBack = () => {},
+}) {
 	console.log("Datalist Render");
 	const [inputValue, setInputValue] = useState("");
 	const [active, setActive] = useState(false);
@@ -13,13 +19,13 @@ export function DataList({ data = [], setSelecteds = () => {}, selectedCallBack 
 	}, []);
 
 	const addSelected = (value) => {
-    console.log("Add Seelected", value)
+		console.log("Add Seelected", value);
 		setSelecteds((selecteds) => {
 			return [...new Set([value, ...selecteds])];
 		});
 	};
 	const onClick = (value) => {
-    console.log("On Click")
+		console.log("On Click");
 		addSelected(value);
 		selectedCallBack();
 	};
@@ -27,7 +33,7 @@ export function DataList({ data = [], setSelecteds = () => {}, selectedCallBack 
 		<div
 			className={`dropdown-container ${data.length > 20 && "w30"} ${data.length > 10 && "w20"} ${active && "active"}`}
 		>
-			<div id="ingrédient-container" className="input-container">
+			<div className="input-container">
 				<input
 					onFocus={() => {
 						datalistRef.current.style.display = "grid";
@@ -43,9 +49,9 @@ export function DataList({ data = [], setSelecteds = () => {}, selectedCallBack 
 					onChange={(e) => setInputValue(e.target.value)}
 					autoComplete="off"
 					list=""
-					name="ingrédient"
-					id="ingrédient"
-					placeholder="Ingredients"
+					name={name}
+					id={name}
+					placeholder={placeholder}
 				/>
 			</div>
 			<div className="datalist" ref={datalistRef}>
