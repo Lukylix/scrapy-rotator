@@ -13,8 +13,10 @@ function getUniqueValues(arr) {
 
 export async function askAnswers(answers = { tasks: [], proxies: [] }) {
 	let willCrawl = false;
+	if (!answers.tasks) answers.tasks = [];
+	if (!answers.proxies) answers.proxies = [];
 
-	if (!process.env.IS_DOCKER && answers.tasks.length < 1) {
+	if (!process.env.IS_DOCKER && answers?.tasks?.length < 1) {
 		answers = {
 			...answers,
 			...(await inquirer.prompt([
@@ -56,7 +58,7 @@ export async function askAnswers(answers = { tasks: [], proxies: [] }) {
 				answers.backends = { ...answers.backends, [backend]: tasksForBackend.map((task) => task.value) };
 			}
 		const playwrightTasks = answers.tasks.filter((task) =>
-			tasks.find((t) => t.value === task).backends.includes("playwright")
+			tasks.find((t) => t.value === task)?.backends?.includes("playwright")
 		);
 		if (playwrightTasks.length > 0) {
 			answers = {
@@ -88,20 +90,20 @@ export async function askAnswers(answers = { tasks: [], proxies: [] }) {
 					])),
 				};
 			}
-
-			if (!process.env.IS_DOCKER && !answers.storage)
-				answers = {
-					...answers,
-					...(await inquirer.prompt([
-						{
-							type: "list",
-							name: "storage",
-							message: "Sélectionnez le type de stockage :",
-							choices: storage,
-						},
-					])),
-				};
 		}
+
+		if (!process.env.IS_DOCKER && !answers.storage)
+			answers = {
+				...answers,
+				...(await inquirer.prompt([
+					{
+						type: "list",
+						name: "storage",
+						message: "Sélectionnez le type de stockage :",
+						choices: storage,
+					},
+				])),
+			};
 		return answers;
 	}
 }

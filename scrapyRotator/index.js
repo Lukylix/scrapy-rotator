@@ -4,10 +4,8 @@ import { getAnswersFromArgs, choicesDefinition } from "../common/utils/index.js"
 let proxies = [];
 
 let answers = getAnswersFromEnv();
-console.log("answers from env", answers);
 answers = { ...answers, ...getAnswersFromArgs(answers) };
 
-console.log("answers scrapy rotator", answers);
 if (answers.proxies && answers.proxies.length > 0) {
 	for (const proxy of answers.proxies) {
 		const proxyObject = choicesDefinition.proxies.find((p) => p.value === proxy);

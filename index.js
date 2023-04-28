@@ -3,6 +3,7 @@ import { askAnswers, getAnswersFromArgs, getArgsFromAnswers } from "./common/uti
 import dotenv from "dotenv";
 import { getAnswersFromEnv } from "./common/utils/getAnswersFromEnv.js";
 import { getEnvArgsFromAnwsers } from "./common/utils/getEnvArgsFromAnswer.js";
+import axios from "axios";
 
 dotenv.config();
 
@@ -33,7 +34,7 @@ async function startChildProcess(command, args, name = "") {
 		});
 
 	child.stderr.on("data", (data) => {
-		console.error(`${name} error: ${data.toString().replace(/\n/gm, "")}`);
+		console.error(`${name} error: ${data.toString()}`);
 	});
 	// Forward SIGINT signal to child process
 	process.on("SIGINT", () => {
@@ -48,10 +49,10 @@ answers = { ...answers, ...getAnswersFromArgs(answers) };
 
 // Ask for for missing answers
 answers = await askAnswers(answers);
-
 const argsTasks = getArgsFromAnswers(answers);
+console.log("argsTasks", argsTasks);
 if (process.env.IS_DOCKER) console.log("Running in docker runing sub containers is not implemented yet");
-if (argsTasks.elasticsearch && !process.env.IS_DOCKER)
+if (argsTasks?.elasticsearch?.length > 0 && !process.env.IS_DOCKER)
 	startChildProcess("docker", ["compose", "-f", "./elasticsearch/docker-compose.yml", "up"], "Elasticsearch");
 if ((argsTasks.scrapy && !answers?.playwrightInDocker) || (argsTasks.scrapy && process.env.IS_DOCKER))
 	startChildProcess(
@@ -65,3 +66,9 @@ if (argsTasks.scrapy && answers?.playwrightInDocker && !process.env.IS_DOCKER)
 		["run", "-v", "./common/data:/app/common/data", ...getEnvArgsFromAnwsers(answers), "scrapy"],
 		process.env.IS_DOCKER ? undefined : "Scrapy"
 	);
+if (argsTasks?.backend?.length > 0) {
+	startChildProcess("nodemon", ["./backend/index.js", ...(argsTasks?.api || [])], "API");
+}
+if (argsTasks?.frontend?.length > 0) {
+	startChildProcess("node", ["./frontend/node_modules/vite/bin/vite.js", "./frontend"], "Frontend");
+}

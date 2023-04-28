@@ -34,7 +34,7 @@ export function getAnswersFromArgs(answers = { tasks: [], proxies: [] }) {
 			answers.playwrightInDocker = true;
 		}
 	}
-	if (answers.backends && answers.backends.length > 0)
+	if (answers.tasks && answers.backends && answers.backends.length > 0)
 		// Reformating backends for each task
 		answers.backends = answers.backends
 			.map((backend) => {

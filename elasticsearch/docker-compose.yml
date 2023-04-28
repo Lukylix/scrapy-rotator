@@ -1,31 +1,59 @@
-version: '2.2'
+version: '3.3'
 services:
-    elasticsearch1:
-        image: docker.elastic.co/elasticsearch/elasticsearch:7.13.4
-        container_name: elasticsearch1
-        environment:
-            - cluster.name=docker-cluster
-            - node.name=elasticsearch1
-            - cluster.initial_master_nodes=elasticsearch1
-            - bootstrap.memory_lock=true
-            - http.cors.allow-origin=http://localhost:1358,http://127.0.0.1:1358
-            - http.cors.enabled=true
-            - http.cors.allow-headers=X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization
-            - http.cors.allow-credentials=true
-            - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-        ulimits:
-            memlock:
-                soft: -1
-                hard: -1
-        volumes:
-            - elasticdata:/usr/share/elasticsearch/data
-        ports:
-            - 9200:9200
-    dejavu:
-        image: appbaseio/dejavu
-        container_name: dejavu
-        ports:
-            - 1358:1358
+  elasticsearch:
+    container_name: elasticsearch
+    ports:
+        - '9200:9200'
+    environment:
+        - http.port=9200
+        - discovery.type=single-node
+        - ELASTIC_USERNAME=elastic
+        - ELASTIC_PASSWORD=MagicWord
+        - http.max_content_length=10MB
+        - http.cors.enabled=true
+        - 'http.cors.allow-origin=\*'
+        - 'http.cors.allow-headers=X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization'
+        - http.cors.allow-credentials=true
+        - network.publish_host=localhost
+    image: 'elasticsearch'
+    volumes:
+      - elastic-data:/usr/share/elasticsearch/data
+      - ./es.java.security:/usr/share/elasticsearch/config/es.java.security
+      - ./java.security.options:/usr/share/elasticsearch/config/jvm.options.d/java.security.options
+      - ./certs:/usr/share/elasticsearch/config/certs
+    networks:
+      - elastic
+    depends_on:
+      - create_cert
+    user: "1000:0"
+  create_cert:
+    image: 'docker.elastic.co/elasticsearch/elasticsearch:8.7.0'
+    volumes:
+      - ./certs:/usr/share/elasticsearch/config/certs
+    command: >
+        bash -c '
+          mkdir -p certs;
+          if [[ ! -f /usr/share/elasticsearch/config/certs/bundle.zip ]]; then
+            bin/elasticsearch-certutil cert --self-signed --silent --pem -out /usr/share/elasticsearch/config/certs/bundle.zip;
+            unzip /usr/share/elasticsearch/config/certs/bundle.zip -d /usr/share/elasticsearch/config/certs; 
+          fi;
+          chown -R 1000:0 /usr/share/elasticsearch/config/certs;
+          chmod -R 700 /usr/share/elasticsearch/config/certs;
+        '
+    user: "1000:0"
+
+  dejavu:
+    image: appbaseio/dejavu
+    container_name: dejavu
+    networks:
+      - elastic
+    ports:
+      - 1358:1358
+
 volumes:
-    elasticdata:
-        driver: local
+  elastic-data:
+  certs:
+
+networks:
+  elastic:
+      driver: bridge 

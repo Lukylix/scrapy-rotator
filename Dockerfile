@@ -8,4 +8,11 @@ COPY package.json .
 USER root
 RUN npm install
 COPY  . .
+
+WORKDIR /app/backend
+RUN npm install
+WORKDIR /frontend
+RUN npm install
+WORKDIR /app
+
 CMD [ "node", "index.js" ]

@@ -1,11 +1,10 @@
-import { tasks as tasksDef } from "./choicesDefinition.js";
+import { tasks, tasks as tasksDef } from "./choicesDefinition.js";
 import dotenv from "dotenv";
 
 dotenv.config();
 
 export function getAnswersFromEnv() {
 	let answers = { tasks: [], proxies: [] };
-	console.log(process.env);
 	if (process.env.TASKS)
 		answers.tasks = (process.env.TASKS || "").includes(",") ? process.env.TASKS.split(",") : [process.env.TASKS];
 	if (process.env.PROXIES)
@@ -24,5 +23,7 @@ export function getAnswersFromEnv() {
 			),
 		];
 	if (process.env.PLAYWRITE_IN_DOCKER) answers.playwrightInDocker = process.env.PLAYWRITE_IN_DOCKER;
+
+	if (answers?.tasks?.length < 1) delete answers.tasks;
 	return answers;
 }

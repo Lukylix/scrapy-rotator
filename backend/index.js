@@ -1,11 +1,7 @@
 #!/usr/bin/env node
 
-/**
- * Module dependencies.
- */
-
 import app from "./app.js";
-import { http } from "http";
+import http from "http";
 
 /**
  * Get port from environment and store in Express.
@@ -81,5 +77,5 @@ function onError(error) {
 function onListening() {
 	let addr = server.address();
 	let bind = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;
-	debug("Listening on " + bind);
+	console.log("Listening on " + bind);
 }

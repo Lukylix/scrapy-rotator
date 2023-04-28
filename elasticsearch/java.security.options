@@ -1,0 +1,1 @@
+-Djava.security.properties=//usr/share/elasticsearch/config/es.java.security

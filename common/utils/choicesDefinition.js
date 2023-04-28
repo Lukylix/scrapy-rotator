@@ -7,6 +7,7 @@ import {
 	productsWithInfosPlaywright,
 } from "../../scrapyRotator/crawlers/index.js";
 import { getFreeProxies, getPremiumProxies } from "../../scrapyRotator/utils/index.js";
+import { importProductsFromJson } from "../../scrapyRotator/scripts/importProductsFromJson.js";
 
 export const tasks = [
 	{ value: "elastic-run", name: "Run ElasticSearch", for: "elasticsearch", checked: true },
@@ -53,6 +54,14 @@ export const tasks = [
 		get: {
 			playwright: productsPlaywright,
 		},
+	},
+	{
+		value: "import-products-to-db",
+		name: "Importer les produits dans la base de données",
+		for: "scrapy",
+		checked: false,
+		depends: ["products"],
+		do: importProductsFromJson,
 	},
 	{
 		value: "products-infos",

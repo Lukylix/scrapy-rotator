@@ -24,10 +24,10 @@ Thanks to inquirer !
 docker build . -t scrapy
 ```
 
-To run the container you will need to pass TASK, BACKEND and PROXIES environement letible like so :
+To run the container you will need to pass TASKS, BACKENDS and PROXIES environement letible like so :
 
 ```bash
-docker run -v ${pwd}/data:/app/data -e TASKS=products-supermarket,playwright -e PROXIES=premium scrapy -e STORAGE=db
+docker run -v ${pwd}/data:/app/data -e TASKS=products-supermarket,playwright - BACKENDS=playwright,crawlee -e PROXIES=premium scrapy -e STORAGE=db
 ```
 
 You can see common/utils/choicesDefinition.js to see all the possible options
