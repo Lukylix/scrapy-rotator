@@ -104,7 +104,7 @@ export function AnalyseProducts() {
 						<i className="fas fa-search"></i>
 					</label>
 
-					<h4>Sort</h4>
+					{slectedSortProperties.length > 0 && <h3>Sort</h3>}
 					<div className="tags">
 						{slectedSortProperties.map((sortProperty, i) => (
 							<span className="tag sort" key={i} onClick={() => removeSelectedSortProperty(sortProperty.trim())}>
@@ -112,7 +112,7 @@ export function AnalyseProducts() {
 							</span>
 						))}
 					</div>
-					<h4>Filters</h4>
+					{selectedFilters.length > 0 && <h3>Filters</h3>}
 					<div className="tags">
 						{selectedFilters.map((filterProperty, i) => (
 							<span

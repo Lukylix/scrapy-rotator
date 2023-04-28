@@ -3,6 +3,8 @@
 body {
 	font-family: "Roboto", sans-serif;
 	font-weight: bold;
+	background-color: #21252b;
+	color: white;
 }
 
 header {
@@ -28,6 +30,7 @@ input {
 	background-color: #e7e7e7;
 	border: none;
 	border-radius: 10px;
+	margin-right: 15px;
 }
 .research-bar input {
 	width: 100%;
@@ -95,16 +98,16 @@ input {
 	width: fit-content;
 	font-size: 20px;
 	font-weight: bold;
-	background-color: #272727;
-	color: black;
+	background-color: #282c34;
+	color: white;
 	padding: 5px;
 	border-radius: 10px 0 0 0;
 }
 
 #card-container .card figure .prices .price-per-unit {
 	width: fit-content;
-	background-color: #272727;
-	color: black;
+	background-color: #282c34;
+	color: white;
 	padding: 5px;
 	border-radius: 10px 0 0 0;
 }
@@ -112,7 +115,7 @@ input {
 	height: 30%;
 	width: 100%;
 	padding: 15px;
-	background-color: #272727;
+	background-color: #282c34;
 }
 
 #card-container .card h2 {
@@ -143,7 +146,7 @@ input {
 
 .input-container {
 	display: inline-block;
-	margin: 10px 10px 10px 0px;
+	margin: 15px 15px 15px 0px;
 }
 
 .input-container i {

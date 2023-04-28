@@ -1,7 +1,6 @@
 .dropdown-container {
 	width: 200px;
 	display: inline-block;
-	margin-top: 10px;
 	margin-right: 15px;
 }
 .dropdown-container.active.w30 {
