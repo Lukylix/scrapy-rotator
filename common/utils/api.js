@@ -56,7 +56,7 @@ const updateProduct = async (product) => {
 	}
 };
 
-const getProducts = async (page, search = "", sorts, filters = []) => {
+const getProducts = async (page, search = "", sorts = [], filters = []) => {
 	try {
 		const result = await axios.get(
 			`${baseUrl}/products?page=${page}&search=${encodeURIComponent(search)}&sorts=${encodeURIComponent(

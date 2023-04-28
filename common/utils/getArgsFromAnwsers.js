@@ -30,6 +30,12 @@ export function getArgsFromAnswers(answers = { tasks: [], proxies: [], backends:
 		];
 
 	if (argsTasks.frontend) argsTasks.frontend = [...(argsTasks.frontend || []), "-s", answers.storage];
-	if (argsTasksBackend.length > 0) argsTasks.backend = [...(argsTasks.backend || []), "-s", answers.storage];
+	if (argsTasksBackend.length > 0)
+		argsTasks.backend = [
+			...(argsTasks.backend || []),
+			"-s",
+			answers.storage,
+			...(answers.cronSchedule ? ["-c", ...answers?.cronSchedule] : []),
+		];
 	return argsTasks;
 }

@@ -9,9 +9,31 @@ dotenv.config();
 
 const noLogsFor = ["elasticsearch"];
 
-async function startChildProcess(command, args, name = "") {
+function getNextCronJobTime(cronString) {
+	const regex = /^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)$/;
+
+	const [, minute, hour, dayOfMonth, month, dayOfWeek, command] = cronString.match(regex);
+
+	const now = new Date();
+	const nextDate = new Date(
+		now.getFullYear(),
+		parseInt(month) - 1,
+		parseInt(dayOfMonth),
+		parseInt(hour),
+		parseInt(minute),
+		0,
+		0
+	);
+	const diff = nextDate - now;
+	const nextInterval = diff < 0 ? 7 * 24 * 60 * 60 * 1000 + diff : diff;
+
+	return nextInterval;
+}
+
+async function startChildProcess(command, args, name = "", cronSchedule = null) {
 	let child;
 	child = spawn(command, args, { env: process.env });
+	let asExited = false;
 
 	child.on("exit", (code, signal) => {
 		console.log(`Child process exited with code ${code} and signal ${signal}.`);
@@ -22,6 +44,18 @@ async function startChildProcess(command, args, name = "") {
 				console.log("Restarting child process...");
 				startChildProcess(command, args, name);
 			}, 2000);
+		}
+		{
+			asExited = true;
+			if (cronSchedule) {
+				const nextCronJobTime = getNextCronJobTime(cronSchedule);
+				console.log(`Next cron job in ${nextCronJobTime / 1000} seconds`);
+				setTimeout(() => {
+					if (asExited) {
+						spawn(command, args, { env: process.env });
+					}
+				}, nextCronJobTime);
+			}
 		}
 	});
 
@@ -58,7 +92,8 @@ if ((argsTasks.scrapy && !answers?.playwrightInDocker) || (argsTasks.scrapy && p
 	startChildProcess(
 		"node",
 		["./scrapyRotator/index.js", ...argsTasks.scrapy],
-		process.env.IS_DOCKER ? undefined : "Scrapy"
+		process.env.IS_DOCKER ? undefined : "Scrapy",
+		answers?.cronSchedule
 	);
 if (argsTasks.scrapy && answers?.playwrightInDocker && !process.env.IS_DOCKER)
 	startChildProcess(

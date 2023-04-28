@@ -3,7 +3,10 @@ import { tasks as tasksDef } from "./choicesDefinition.js";
 export function getAnswersFromArgs(answers = { tasks: [], proxies: [] }) {
 	const args = process.argv.slice(2);
 	for (let i = 0; i < args.length; i++) {
-		if (args[i] === "-t") {
+		if (args[i] === "-c") {
+			// Cron
+			answers.cronSchedule = [...answers.cronSchedule, args[i + 1]];
+		} else if (args[i] === "-t") {
 			// Tasks
 			let tasks = [];
 			while (args[i + 1] && !args[i + 1].startsWith("-")) {

@@ -14,6 +14,7 @@ services:
         - 'http.cors.allow-origin=\*'
         - 'http.cors.allow-headers=X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization'
         - http.cors.allow-credentials=true
+        - xpack.security.enrollment.enabled=true
         - network.publish_host=localhost
     image: 'elasticsearch'
     volumes:
@@ -41,14 +42,6 @@ services:
           chmod -R 700 /usr/share/elasticsearch/config/certs;
         '
     user: "1000:0"
-
-  dejavu:
-    image: appbaseio/dejavu
-    container_name: dejavu
-    networks:
-      - elastic
-    ports:
-      - 1358:1358
 
 volumes:
   elastic-data:

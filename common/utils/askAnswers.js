@@ -88,6 +88,14 @@ export async function askAnswers(answers = { tasks: [], proxies: [] }) {
 							choices: proxies,
 						},
 					])),
+					...(await inquirer.prompt([
+						{
+							type: "input",
+							name: "cronSchedule",
+							message: "Entrez la fréquence de scrape cron schedule: (min hour day month weekday) :",
+							default: false,
+						},
+					])),
 				};
 			}
 		}

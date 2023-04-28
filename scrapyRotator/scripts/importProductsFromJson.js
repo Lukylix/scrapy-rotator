@@ -4,7 +4,7 @@ import { getFilePath } from "../utils/getFilePath.js";
 import axios from "axios";
 
 const importProductsFromJson = async () => {
-	const products = JSON.parse(
+	let products = JSON.parse(
 		fs.readFileSync(getFilePath("../../common/data/productsWithInfos.json", import.meta.url), "utf8")
 	);
 	console.log("products", products.length);
@@ -21,6 +21,11 @@ const importProductsFromJson = async () => {
 		let productsInDB = [];
 		let totalPages = 1000;
 		let page = 1;
+		products = products.map((product) => ({
+			...product,
+			pricePerQuantityPerKcal:
+				parseFloat(product.perUnitPrice) / parseInt(product?.nutricionalValues?.kcal?.value) || undefined,
+		}));
 		while (page <= totalPages) {
 			const productsPage = await getProducts(page);
 			totalPages = productsPage.totalPages;
@@ -34,7 +39,7 @@ const importProductsFromJson = async () => {
 		console.log("Products to add", productsToAdd.length);
 		console.log("Processing in 5sev");
 		await setTimeout(() => {}, 5000);
-		for (const product of productsToAdd) {
+		for (const product of products) {
 			await insertProduct(product);
 		}
 		console.log("Products imported successfully!");

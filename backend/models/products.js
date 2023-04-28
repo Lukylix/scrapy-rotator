@@ -10,6 +10,7 @@ const productMapping = {
 		images: { type: "text" },
 		nutricionalScore: { type: "keyword" },
 		ingredients: { type: "text" },
+		pricePerQuantityPerKcal: { type: "float" },
 		nutricionalValues: { type: "object" },
 		link: { type: "text", index: true },
 		price: { type: "keyword" },
@@ -44,6 +45,8 @@ const sortProperties = {
 	"price-per-unit-price-desc": { "perUnitPrice.pricePerUnit": { order: "desc", unmapped_type: "keyword" } },
 	"price-per-unit-quantity-asc": { "perUnitPrice.quantity": { order: "asc", unmapped_type: "keyword" } },
 	"price-per-unit-quantity-desc": { "perUnitPrice.quantity": { order: "desc", unmapped_type: "keyword" } },
+	"price-per-quantity-kcal-asc": { pricePerQuantityPerKcal: { order: "asc", unmapped_type: "float" } },
+	"price-per-quantity-kcal-desc": { pricePerQuantityPerKcal: { order: "desc", unmapped_type: "float" } },
 };
 
 const filterTypes = {
@@ -59,6 +62,7 @@ const filterTypes = {
 		"perUnitPrice.pricePer",
 		"perUnitPrice.quantity",
 		"perUnitPrice.unit",
+		"pricePerQuantityPerKcal",
 	],
 	types: ["term", "range", "match"],
 	operationsRange: ["gt", "gte", "lt", "lte", "eq", "ne"],
@@ -93,7 +97,10 @@ const createProductIndex = async () => {
 const getProducts = async (page, pageSize, filters = [], search = "", sorts) => {
 	try {
 		await createProductIndex();
-		sorts = JSON.parse(sorts);
+		// try to parse json array if fails return empty array
+		sorts = JSON.parse(sorts || "[]");
+
+		console.log("sorts", sorts);
 		sorts = Array.isArray(sorts) ? sorts : [sorts];
 		sorts = sorts.filter((sort) => sort !== "");
 		filters = JSON.parse(filters);
@@ -220,8 +227,8 @@ const insertProduct = async (product) => {
 			console.log(`Inserted product with id: ${result._id}`);
 			return result;
 		} else {
-			console.log(`Product with link ${product.link} already exists in index.`);
-			return hits.hits.hits[0];
+			const result = await updateProduct({ ...hits.hits.hits[0]._source, id: hits.hits.hits[0]._id });
+			return result;
 		}
 	} catch (error) {
 		console.error(`Error inserting product: ${product.name}`);
@@ -241,7 +248,7 @@ const updateProduct = async (product) => {
 				},
 			},
 		});
-		console.log(`Updated product with id: ${result}`);
+		console.log(`Updated product with id: ${result._id}`);
 		return result;
 	} catch (error) {
 		console.error(`Error updating product: body${product.name}`);
@@ -256,7 +263,7 @@ const deleteProduct = async (id) => {
 			index: indexName,
 			id: id,
 		});
-		console.log(`Deleted product with id: ${result}`);
+		console.log(`Deleted product with id: ${result._id}`);
 		return result.body;
 	} catch (error) {
 		console.error(`Error deleting product with id: ${id}`);

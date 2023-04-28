@@ -5,6 +5,7 @@ dotenv.config();
 
 export function getAnswersFromEnv() {
 	let answers = { tasks: [], proxies: [] };
+	if (process.env.CRON) answers.cronSchedule = process.env.CRON;
 	if (process.env.TASKS)
 		answers.tasks = (process.env.TASKS || "").includes(",") ? process.env.TASKS.split(",") : [process.env.TASKS];
 	if (process.env.PROXIES)
