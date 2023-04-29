@@ -104,88 +104,60 @@ const getProducts = async (page, pageSize, filters = [], search = "", sorts) => 
 		sorts = Array.isArray(sorts) ? sorts : [sorts];
 		sorts = sorts.filter((sort) => sort !== "");
 		filters = JSON.parse(filters);
-
+		console.log("search", search);
 		const hits = await client.search({
 			index: indexName,
 			from: (page - 1) * pageSize,
 			size: pageSize,
-			body:
-				search.length > 2
-					? {
-							query: {
-								multi_match: {
-									query: search,
-									fields: ["name^3", "description"],
-								},
+			body: {
+				sort:
+					sorts.length > 0
+						? [...sorts.map((sort) => sortProperties[sort]), { "perUnitPrice.pricePer": { order: "desc" } }]
+						: [{ "perUnitPrice.pricePer": { order: "desc" } }],
 
-								sort:
-									sorts.length > 0
-										? [
-												...sorts.map((sort, i) => ({
-													...sortProperties[sort],
-													boost: i * filters.length - filters.length + 1,
-												})),
-												{ "perUnitPrice.pricePer": { order: "desc" } },
-										  ]
-										: [{ "perUnitPrice.pricePer": { order: "desc" } }],
-								bool: {
-									filter:
-										filters.length > 0
-											? filters.map((filter, i) => {
-													const { property, type, operator, value } = filter;
-													return {
-														[type]:
-															type === "match"
-																? {
-																		[property]: {
-																			query: value,
-																			operator: "AND",
-																			boost: i * filters.length - filters.length + 1,
-																			auto_generate_synonyms_phrase_query: true,
-																		},
-																  }
-																: { [property]: operator ? { [operator]: value } : value },
-													};
-											  })
-											: undefined,
-								},
-							},
-					  }
-					: {
-							sort:
-								sorts.length > 0
-									? [...sorts.map((sort) => sortProperties[sort]), { "perUnitPrice.pricePer": { order: "desc" } }]
-									: [{ "perUnitPrice.pricePer": { order: "desc" } }],
-							query: {
-								// match_all: {},
-
-								bool: {
-									filter:
-										filters.length > 0
-											? filters.map((filter) => {
-													const { property, type, operator, value } = filter;
-													return {
-														[type]:
-															type === "match"
-																? {
-																		[property]: {
-																			query: value,
-																			operator: "AND",
-																			auto_generate_synonyms_phrase_query: true,
-																		},
-																  }
-																: { [property]: operator ? { [operator]: value } : value },
-													};
-											  })
-											: undefined,
-									must:
-										filters.length > 0 ? filters.map((filter) => ({ exists: { field: filter.property } })) : undefined,
-									must_not:
-										filters.length > 0 ? filters.map((filter) => ({ term: { [filter.property]: "" } })) : undefined,
-								},
-							},
-					  },
+				query: {
+					bool: {
+						filter:
+							filters.length > 0
+								? filters.map((filter) => {
+										const { property, type, operator, value } = filter;
+										return {
+											[type]:
+												type === "match"
+													? {
+															[property]: {
+																query: value,
+																operator: "AND",
+																auto_generate_synonyms_phrase_query: true,
+															},
+													  }
+													: { [property]: operator ? { [operator]: value } : value },
+										};
+								  })
+								: undefined,
+						must:
+							filters.length > 0 || search.length > 0
+								? [
+										search.length > 3
+											? {
+													multi_match: {
+														query: search,
+														fields: ["name^3", "description"],
+														type: "cross_fields",
+													},
+											  }
+											: {
+													match_all: {},
+											  },
+										...filters.map((filter) => ({ exists: { field: filter.property } })),
+								  ]
+								: undefined,
+						must_not: filters.length > 0 ? filters.map((filter) => ({ term: { [filter.property]: "" } })) : undefined,
+					},
+				},
+			},
 		});
+		console.log("hits", hits.hits.total.value);
 		if (!hits.hits.total.value === 0)
 			return { page, pageSize, total: hits.hits.total.value || 1, totalPages: 0, products: [] };
 		const products = hits.hits.hits?.map((product) => product._source);
