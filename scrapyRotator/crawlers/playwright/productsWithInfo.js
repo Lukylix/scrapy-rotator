@@ -15,13 +15,13 @@ const routes = {
 let cookies = [];
 
 const nutricionalNamesDic = {
-	"valeur énergétique (kJ)": "kj",
-	"valeur énergétique (kcal)": "kcal",
+	"valeur energetique (kJ)": "kj",
+	"valeur energetique (kcal)": "kcal",
 	"Matieres grasses": "fat",
-	"Dont acides gras saturés": "acideFat",
+	"Dont acides gras satures": "staturatedFat",
 	Glucides: "glucid",
-	"Dont sucres": "sucar",
-	Protéines: "protein",
+	"Dont sucres": "sugar",
+	Proteines: "protein",
 	Sel: "salt",
 };
 
@@ -52,7 +52,19 @@ export function refactorProducts(products) {
 
 			perUnitPrice = { quantity: quantity2, unit: unit2, pricePer, pricePerUnit };
 		}
-		return { ...product, perUnitPrice, nutricionalValues: nutricionalValuesObject };
+		let nutricionalValuesPerPricePerQuantity = {};
+		if (perUnitPrice?.pricePer) {
+			nutricionalValuesPerPricePerQuantity = Object.keys(nutricionalValuesObject).reduce((acc, nutricionalkey) => {
+				acc[nutricionalkey] =
+					(parseInt(nutricionalValuesObject[nutricionalkey]) * 100) / parseFloat(perUnitPrice.pricePer);
+			}, {});
+		}
+		return {
+			...product,
+			perUnitPrice,
+			nutricionalValues: nutricionalValuesObject,
+			nutricionalValuesPerPricePerQuantity,
+		};
 	});
 }
 

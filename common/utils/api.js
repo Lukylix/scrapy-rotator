@@ -39,7 +39,7 @@ const getFilterProperties = async () => {
 const insertProduct = async (product) => {
 	try {
 		const result = await axios.post(`${baseUrl}/product`, product);
-		console.log(`Inserted product with id: ${result.data}`);
+		console.log(`Inserted product with id: ${result.data._id}`);
 		return result.data;
 	} catch (error) {
 		console.error(`Error inserting product: ${product.name}`);

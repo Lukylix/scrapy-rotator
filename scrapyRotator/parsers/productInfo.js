@@ -1,13 +1,19 @@
 const nutricionalNamesDic = {
-	"valeur énergétique (kJ)": "kj",
-	"valeur énergétique (kcal)": "kcal",
-	"Matieres grasses": "fat",
-	"Dont acides gras saturés": "acideFat",
-	Glucides: "glucid",
-	"Dont sucres": "sucar",
-	Protéines: "protein",
-	Sel: "salt",
+	"valeur énergetique (kj)": "kj",
+	"valeur énergetique (kcal)": "kcal",
+	"matieres grasses": "fat",
+	"dont acides gras satures": "acideFat",
+	"acides gras satures": "acideFat",
+	glucides: "glucid",
+	sucres: "sucar",
+	"dont sucres": "sucar",
+	proteines: "protein",
+	sel: "salt",
 };
+
+function removeAccents(str) {
+	return str.normalize("NFD").replace(/\p{Diacritic}/gu, "");
+}
 
 export function parseProductInfo($) {
 	const ingredients = $(".product-block-content span").text().trim();
@@ -24,7 +30,7 @@ export function parseProductInfo($) {
 	let nutricionalValues = [];
 	$(".nutritional-fact").each((i, fact) => {
 		const factName = $(fact).find(".nutritional-fact__name").text().trim();
-		const factNameShorthand = nutricionalNamesDic[factName.trim()] || factName;
+		const factNameShorthand = nutricionalNamesDic[removeAccents(factName.trim().toLowerCase())] || factName;
 		const factValue = $(fact).find(".nutritional-fact__center").text().trim();
 
 		nutricionalValues.push({ name: factNameShorthand, value: factValue });

@@ -116,30 +116,33 @@ export async function getFreeProxies() {
 export async function getPremiumProxies() {
 	let proxies = readProxiesFromDirectoryRecursive(getFilePath("../../common/data/proxies/premium", import.meta.url));
 	console.log("proxies", proxies.length);
-	if (proxies.length < 1) {
-		const proxiesReponse = await axios.get(
-			`https://api.proxyscrape.com/v2/account/datacenter_shared/proxy-list?auth=${process.env.API_KEY}&type=getproxies&country[]=all&protocol=http&format=normal&status=online`
-		);
-		const proxiesString = proxiesReponse.data;
-		fs.writeFileSync(
-			getFilePath("../../common/data/proxies/premium/proxyscrape_premium_http_proxies.txt", import.meta.url),
-			proxiesString
-		);
-		proxies = proxiesString.split("\r\n");
-		proxies = proxies
-			.map((proxi) => {
-				const [ip, port] = proxi.split(":");
-				return {
-					ip,
-					port: port,
-					failedRequests: 0,
-				};
-			})
-			.filter((proxy) => proxy.ip && proxy.port)
-			.sort(() => Math.random() - 0.5);
-	} else {
-		proxies = proxies.sort(() => Math.random() - 0.5);
-	}
-	proxies = proxies.filter((proxy) => proxy.ip.match(/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/));
+	try {
+		if (proxies.length < 1) {
+			const proxiesReponse = await axios.get(
+				`https://api.proxyscrape.com/v2/account/datacenter_shared/proxy-list?auth=${process.env.API_KEY}&type=getproxies&country[]=all&protocol=http&format=normal&status=online`
+			);
+			const proxiesString = proxiesReponse.data;
+			fs.writeFileSync(
+				getFilePath("../../common/data/proxies/premium/proxyscrape_premium_http_proxies.txt", import.meta.url),
+				proxiesString
+			);
+			proxies = proxiesString.split("\r\n");
+			proxies = proxies
+				.map((proxi) => {
+					const [ip, port] = proxi.split(":");
+					return {
+						ip,
+						port: port,
+						failedRequests: 0,
+					};
+				})
+				.filter((proxy) => proxy.ip && proxy.port)
+				.sort(() => Math.random() - 0.5);
+		} else {
+			proxies = proxies.sort(() => Math.random() - 0.5);
+		}
+		proxies = proxies.filter((proxy) => proxy.ip.match(/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/));
+	} catch (e) {}
+
 	return proxies;
 }

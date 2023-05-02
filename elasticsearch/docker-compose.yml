@@ -45,6 +45,7 @@ services:
 
 volumes:
   elastic-data:
+    external: true
   certs:
 
 networks:

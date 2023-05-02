@@ -24,6 +24,7 @@ Thanks to inquirer !
 ### Build
 
 ```bash
+docker volume create elastic-data
 docker build . -t scrapy
 dokcer build ./ealsticsearch -t ealsticsearch
 ```

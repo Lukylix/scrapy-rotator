@@ -9,7 +9,6 @@ answers = { ...answers, ...getAnswersFromArgs(answers) };
 if (answers.proxies && answers.proxies.length > 0) {
 	for (const proxy of answers.proxies) {
 		const proxyObject = choicesDefinition.proxies.find((p) => p.value === proxy);
-		console.log("proxyObject", proxyObject);
 		proxies = [...proxies, ...(await proxyObject.get())];
 	}
 }

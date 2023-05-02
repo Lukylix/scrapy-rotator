@@ -100,7 +100,7 @@ if (argsTasks.scrapy && answers?.playwrightInDocker && !process.env.IS_DOCKER)
 		process.env.IS_DOCKER ? undefined : "Scrapy"
 	);
 if (argsTasks?.backend?.length > 0) {
-	startChildProcess("nodemon", ["./backend/index.js", ...(argsTasks?.api || [])], "API");
+	startChildProcess("node", ["./backend/index.js", ...(argsTasks?.api || [])], "API");
 }
 if (argsTasks?.frontend?.length > 0) {
 	startChildProcess("node", ["./frontend/node_modules/vite/bin/vite.js", "./frontend"], "Frontend");

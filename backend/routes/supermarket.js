@@ -7,7 +7,7 @@ import {
 	deleteProduct,
 	getSortProperties,
 	getFilterProperties,
-} from "../models/products.js";
+} from "../controllers/products.js";
 let router = express.Router();
 
 router.get("/sort-properties", async (req, res, next) => {

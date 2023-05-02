@@ -21,12 +21,6 @@ const importProductsFromJson = async () => {
 		let productsInDB = [];
 		let totalPages = 1000;
 		let page = 1;
-		products = products.map((product) => ({
-			...product,
-			pricePerQuantityPerKcal:
-				parseInt(product?.nutricionalValues?.kcal?.value * 100) / parseFloat(product?.perUnitPrice?.pricePer) ||
-				undefined,
-		}));
 		while (page <= totalPages) {
 			const productsPage = await getProducts(page);
 			totalPages = productsPage.totalPages;
@@ -37,12 +31,12 @@ const importProductsFromJson = async () => {
 		const productsToAdd = products.filter((product) => !productsInDB.find((p) => p.link === product.link));
 
 		console.log("Products to add", productsToAdd.length);
-		console.log("Processing in 5sev");
+		console.log("Processing in 5 sec");
 		await setTimeout(() => {}, 5000);
-		for (const product of productsToAdd) {
+		for (const product of products) {
 			await insertProduct(product);
 		}
-		console.log("Products imported successfully!");
+		console.log(`${products.length} products imported successfully!`);
 	} catch (error) {
 		console.error(`Error importing products: ${error}`);
 	}

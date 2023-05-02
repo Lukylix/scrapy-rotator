@@ -1,5 +1,5 @@
 import { getProxyConfiguration, setProxies } from "../../clients/crawlee.js";
-import { chromium, firefox, webkit } from "playwright";
+import { chromium } from "playwright";
 import { getFilePath, writeFileSync, parseJSON } from "../../utils/index.js";
 import dotenv from "dotenv";
 import { PlaywrightCrawler, CheerioCrawler } from "crawlee";
@@ -14,8 +14,6 @@ const routes = {
 	store: `${process.env.CATALOGUES_SITE}/api/campaigns/stores/`,
 	rayon: `${process.env.SUPERMARKET_SITE}/r`,
 };
-
-let requests = [];
 
 let cookies = [];
 

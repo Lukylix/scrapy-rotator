@@ -82,6 +82,6 @@ export const storage = [
 ];
 
 export const proxies = [
-	{ value: "premium", name: "Premium", checked: true, get: getFreeProxies },
-	{ value: "free", name: "Free", checked: false, get: getPremiumProxies },
+	{ value: "premium", name: "Premium", checked: true, get: getPremiumProxies },
+	{ value: "free", name: "Free", checked: false, get: getFreeProxies },
 ];
